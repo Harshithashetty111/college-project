@@ -5,12 +5,14 @@ import { useState } from "react";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setMessage("");
+    setError("");
+    setSuccess("");
     setLoading(true);
 
     try {
@@ -23,18 +25,24 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setMessage(data.detail || "Login failed");
+        setError(data.detail || "Invalid email or password");
         setLoading(false);
         return;
       }
 
+      // ✅ SAVE BASIC USER INFO
       localStorage.setItem("doctor_id", data.doctor_id);
       localStorage.setItem("doctor_name", data.name);
       localStorage.setItem("doctor_email", data.email);
 
-      window.location.href = "/dashboard";
+      // ✅ SUCCESS MESSAGE + REDIRECT
+      setSuccess("Login successful! Redirecting...");
+      setTimeout(() => {
+        window.location.href = "/dashboard";
+      }, 1200);
+
     } catch {
-      setMessage("Backend not reachable");
+      setError("Backend not reachable");
     } finally {
       setLoading(false);
     }
@@ -42,6 +50,8 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex">
+
+      {/* LEFT IMAGE */}
       <div className="hidden md:block w-1/2 relative">
         <img
           src="/doctors-team.png"
@@ -58,14 +68,26 @@ export default function LoginPage() {
         </div>
       </div>
 
+      {/* RIGHT FORM */}
       <div className="w-full md:w-1/2 flex items-center justify-center bg-gray-50">
         <div className="w-full max-w-md px-8">
+
           <h2 className="text-2xl font-bold text-gray-800 mb-1">
             Doctor Login
           </h2>
           <p className="text-gray-500 mb-6 text-sm">
             Sign in to access your dashboard
           </p>
+
+          {/* ERROR MESSAGE */}
+          {error && (
+            <p className="mb-3 text-sm text-red-600">{error}</p>
+          )}
+
+          {/* SUCCESS MESSAGE */}
+          {success && (
+            <p className="mb-3 text-sm text-green-600">{success}</p>
+          )}
 
           <form onSubmit={handleLogin} className="space-y-4">
             <input
@@ -86,9 +108,19 @@ export default function LoginPage() {
               className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm bg-white"
             />
 
-            {message && (
-              <p className="text-sm text-red-600">{message}</p>
-            )}
+            {/* FORGOT PASSWORD (UI ONLY) */}
+            <div className="text-right">
+              <a
+                href="#"
+                className="text-sm text-blue-600 hover:underline"
+                onClick={(e) => {
+                  e.preventDefault();
+                  alert("Password reset feature can be implemented as future work.");
+                }}
+              >
+                Forgot password?
+              </a>
+            </div>
 
             <button
               type="submit"
@@ -98,6 +130,18 @@ export default function LoginPage() {
               {loading ? "Logging in..." : "Login"}
             </button>
           </form>
+
+          {/* REGISTER LINK */}
+          <p className="text-sm text-center mt-4 text-gray-600">
+            Don’t have an account?{" "}
+            <a
+              href="/auth/register"
+              className="text-blue-600 font-medium hover:underline"
+            >
+              Register here
+            </a>
+          </p>
+
         </div>
       </div>
     </div>

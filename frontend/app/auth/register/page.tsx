@@ -19,14 +19,16 @@ export default function RegisterPage() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();                 // ✅ VERY IMPORTANT
+    e.preventDefault();
     setError("");
+    setSuccess("");
 
     if (!form.name || !form.email || !form.password) {
       setError("Please fill all required fields");
@@ -61,14 +63,16 @@ export default function RegisterPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        // ✅ SHOW BACKEND ERROR (email already exists, etc.)
         setError(data.detail || "Registration failed");
         setLoading(false);
         return;
       }
 
-      alert("Registration successful! Please login.");
-      window.location.href = "/auth/login";
+      // ✅ SUCCESS
+      setSuccess("Account created successfully! Redirecting to login...");
+      setTimeout(() => {
+        window.location.href = "/auth/login";
+      }, 1500);
 
     } catch (err) {
       setError("Backend not reachable");
@@ -107,12 +111,16 @@ export default function RegisterPage() {
             Create your account to continue
           </p>
 
-          {/* ✅ ERROR MESSAGE */}
+          {/* ERROR MESSAGE */}
           {error && (
             <p className="mb-4 text-sm text-red-600">{error}</p>
           )}
 
-          {/* ✅ FORM MUST HAVE onSubmit */}
+          {/* SUCCESS MESSAGE */}
+          {success && (
+            <p className="mb-4 text-sm text-green-600">{success}</p>
+          )}
+
           <form
             onSubmit={handleRegister}
             className="grid grid-cols-2 gap-4"
@@ -172,7 +180,6 @@ export default function RegisterPage() {
               className="border rounded-lg px-4 py-3 text-sm bg-white"
             />
 
-            {/* ✅ MUST BE type="submit" */}
             <button
               type="submit"
               disabled={loading}
@@ -181,6 +188,18 @@ export default function RegisterPage() {
               {loading ? "Creating Account..." : "Create Account"}
             </button>
           </form>
+
+          {/* LOGIN LINK */}
+          <p className="text-sm text-center mt-4 text-gray-600">
+            Already have an account?{" "}
+            <a
+              href="/auth/login"
+              className="text-blue-600 font-medium hover:underline"
+            >
+              Login here
+            </a>
+          </p>
+
         </div>
       </div>
     </div>
